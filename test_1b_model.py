@@ -17,6 +17,14 @@ def main():
     print(f"--- Iridis Test Job ---")
     print(f"User: {username}")
     print(f"Saving success log to: {output_file}")
+
+    try:
+        os.makedirs(scratch_path, exist_ok=True)
+        print(f"Successfully ensured scratch directory exists.")
+    except Exception as e:
+        print(f"\n*** CRITICAL ERROR: Could not create scratch directory. ***")
+        print(f"Error: {e}")
+        sys.exit(1)
     
     # --- 2. Check GPU (Critical Test) ---
     print(f"\nPyTorch Version: {torch.__version__}")
