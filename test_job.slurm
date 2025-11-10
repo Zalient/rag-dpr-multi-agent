@@ -8,8 +8,8 @@
 #SBATCH --mem=32G                         # Memory request
 
 # --- Output & Email (as per supervisor) ---
-#SBATCH -o /local/scratch/users/zc3g23/test_1b_job-%j.out  # Save output to scratch
-#SBATCH -e /local/scratch/users/zc3g23/test_1b_job-%j.err  # Save errors to scratch
+#SBATCH -o ~/slurm_logs/test_1b_job-%j.out  # Save output to scratch
+#SBATCH -e ~/slurm_logs/test_1b_job-%j.err  # Save errors to scratch
 #SBATCH --mail-type=END,FAIL              # Email on job end or failure
 #SBATCH --mail-user=zc3g23@soton.ac.uk    # Your email address
 
@@ -18,6 +18,7 @@ echo "Job started at $(date)"
 echo "Running on host: $(hostname)"
 echo "Job ID: $SLURM_JOB_ID"
 echo "Username: $USER"
+mkdir -p /local/scratch/users/$USER
 echo "Scratch directory: /local/scratch/users/$USER"
 
 # --- Activate Conda Environment ---
