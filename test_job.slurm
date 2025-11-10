@@ -2,7 +2,7 @@
 
 # --- Job Configuration ---
 #SBATCH -J test_1b_job                    # Job name
-#SBATCH -p l4_nodes                       # Partition (queue) to use L4 nodes (as per supervisor)
+#SBATCH -p ecsstudents_l4                 # Partition (queue) to use L4 nodes (as per supervisor)
 #SBATCH --nodes=1                         # Number of nodes to request
 #SBATCH --gres=gpu:1                      # Request 1 GPU
 #SBATCH -t 00:15:00                       # Time limit: 15 minutes (plenty for this test)
