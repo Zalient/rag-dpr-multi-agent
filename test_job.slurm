@@ -9,8 +9,8 @@
 #SBATCH --mem=32G                         # Memory request
 
 # --- Output & Email (as per supervisor) ---
-#SBATCH -o $HOME/slurm_logs/test_1b_job-%j.out  # Save output to scratch
-#SBATCH -e $HOME/slurm_logs/test_1b_job-%j.err  # Save errors to scratch
+#SBATCH -o slurm_logs/test_1b_job-%j.out  # Save output to scratch
+#SBATCH -e slurm_logs/test_1b_job-%j.err  # Save errors to scratch
 #SBATCH --mail-type=END,FAIL              # Email on job end or failure
 #SBATCH --mail-user=zc3g23@soton.ac.uk    # Your email address
 
