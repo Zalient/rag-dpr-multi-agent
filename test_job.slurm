@@ -19,13 +19,14 @@ echo "Job started at $(date)"
 echo "Running on host: $(hostname)"
 echo "Job ID: $SLURM_JOB_ID"
 echo "Username: $USER"
+echo "Creating scratch directory..."
 mkdir -p /local/scratch/users/$USER
 echo "Scratch directory: /local/scratch/users/$USER"
 
 # --- Activate Conda Environment ---
-# (Assumes miniconda3 is in your home directory)
+echo "Loading Conda..."
+module load conda/python3
 echo "Activating Conda..."
-source ~/miniconda3/etc/profile.d/conda.sh
 conda activate rag-dpr-multi-agent
 echo "Conda environment 'rag-dpr-multi-agent' activated."
 
