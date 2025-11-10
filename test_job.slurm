@@ -27,7 +27,7 @@ echo "Scratch directory: /local/scratch/users/$USER"
 echo "Loading Conda..."
 module load conda/python3
 echo "Activating Conda..."
-conda activate rag-dpr-multi-agent
+source activate rag-dpr-multi-agent
 echo "Conda environment 'rag-dpr-multi-agent' activated."
 
 # --- Run the Python Test Script ---
