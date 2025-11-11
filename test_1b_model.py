@@ -4,30 +4,20 @@ import os
 import sys
 
 def main():
-    # --- 1. Define Scratch Path (as per supervisor) ---
-    # Get username from environment, default to your user ID
     username = os.environ.get('USER')
     if not username:
         print("FATAL: Could not get $USER from environment.")
         sys.exit(1)
         
-    scratch_path = f'/local/scratch/users/{username}'
+    scratch_path = f'/scratch/{username}'
     output_file = os.path.join(scratch_path, 'iridis_test_SUCCESS.txt')
     
     print(f"--- Iridis Test Job ---")
     print(f"User: {username}")
     print(f"Saving success log to: {output_file}")
-
-    try:
-        os.makedirs(scratch_path, exist_ok=True)
-        print(f"Successfully ensured scratch directory exists.")
-    except Exception as e:
-        print(f"\n*** CRITICAL ERROR: Could not create scratch directory. ***")
-        print(f"Error: {e}")
-        sys.exit(1)
     
-    # --- 2. Check GPU (Critical Test) ---
-    print(f"\nPyTorch Version: {torch.__version__}")
+    # Check GPU
+    print(f"\nPyTorch version: {torch.__version__}")
     if not torch.cuda.is_available():
         print("\n*** CRITICAL ERROR: CUDA IS NOT AVAILABLE. ***")
         print("Check your conda env installation on Iridis.")
@@ -35,7 +25,7 @@ def main():
     
     print(f"CUDA is available. Device: {torch.cuda.get_device_name(0)}")
 
-    # --- 3. Load 1B Model (as per supervisor) ---
+    # Load 1B model
     model_name = "EleutherAI/gpt-neo-1.3B"
     print(f"\nLoading model: {model_name}...")
     try:
@@ -48,11 +38,11 @@ def main():
         
     print("Model loaded successfully.")
 
-    # --- 4. Move to GPU (Tests PyTorch-CUDA Link) ---
+    # Move to GPU (tests PyTorch-CUDA link)
     model.to('cuda')
-    print("Model successfully moved to 'cuda' (GPU).")
+    print("Model successfully moved to CUDA (GPU)")
 
-    # --- 5. Run Test Inference ---
+    # Run testiInference
     print("Running test inference...")
     prompt = "Hello, I am a 1.3B parameter model on Iridis X. My purpose is to"
     inputs = tokenizer(prompt, return_tensors="pt").to('cuda')
@@ -63,7 +53,7 @@ def main():
     print(generated_text)
     print("------------------------------")
 
-    # --- 6. Write Success File to Scratch (as per supervisor) ---
+    # Write Success File to Scratch
     try:
         with open(output_file, 'w') as f:
             f.write(f"SUCCESS: Test job completed.\n")
