@@ -29,8 +29,8 @@ def main():
     model_name = "EleutherAI/gpt-neo-1.3B"
     print(f"\nLoading model: {model_name}...")
     try:
-        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-        model = GPTNeoForCausalLM.from_pretrained(model_name)
+        tokenizer = GPT2Tokenizer.from_pretrained(model_name, local_files_only=True)
+        model = GPTNeoForCausalLM.from_pretrained(model_name, local_files_only=True)
     except Exception as e:
         print(f"*** ERROR: Failed to download/load model. ***")
         print(f"Error: {e}")
