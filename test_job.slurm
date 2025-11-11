@@ -12,7 +12,7 @@
 #SBATCH -o /scratch/zc3g23/slurm_logs/test_1b_job-%j.out  # Save output to scratch
 #SBATCH -e /scratch/zc3g23/slurm_logs/test_1b_job-%j.err  # Save errors to scratch
 #SBATCH --mail-type=END,FAIL              # Email on job end or failure
-#SBATCH --mail-user=zc3g23@soton.ac.uk    # Your email address
+#SBATCH --mail-user=zc3g23@ecs.soton.ac.uk    # Your email address
 
 # Job steps
 echo "Job started at $(date)"
