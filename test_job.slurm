@@ -7,8 +7,8 @@
 #SBATCH -t 00:15:00             # Walltime (15 minutes)
 #SBATCH --mem=32G               # Memory request
 
-#SBATCH -o /scratch/zc3g23/slurm_logs/test_1b_job.out  # Save output to scratch
-#SBATCH -e /scratch/zc3g23/slurm_logs/test_1b_job.err  # Save errors to scratch
+#SBATCH -o /iridisfs/home/zc3g23/rag-dpr-multi-agent/slurm_logs/test_1b_job.out  # Save output to home
+#SBATCH -e /iridisfs/home/zc3g23/rag-dpr-multi-agent/slurm_logs/test_1b_job.err  # Save errors to home
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zorclarke@gmail.com
 
