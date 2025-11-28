@@ -55,22 +55,12 @@ def main():
     output = model.generate(inputs.input_ids, max_length=50, do_sample=True, top_k=50, top_p=0.9)
     end_time = time.time()
     duration = end_time - start_time
-    logger.info(f"Test generation completed in {duration:.3f}")
+    logger.info(f"Test generation completed in {duration:.3f} seconds")
 
     generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
 
     # Log generated text output
     logger.info("\n" + "="*30 + "\n" + generated_text + "\n" + "="*30)
-
-    # Save output to /home
-    log_file = "/iridisfs/home/zc3g23/rag-dpr-multi-agent/model_output.txt"
-    try:
-        with open(log_file, "w") as f:
-            f.write(generated_text)
-        logger.info(f"Generated text saved to: {log_file}")
-    except Exception as e:
-        logger.error(f"Failed to save output to file: {log_file}", exc_info=True)
-        sys.exit(1)
 
 if __name__ == "__main__":
     main()
