@@ -24,19 +24,31 @@ DATASETS = [
 ]
 
 MODELS = [
-    # Base BERT for Custom DPR
-    ("bert-base-uncased", "bert-base-uncased"),
-    
-    # The Judge (Baseline): Facebook's Pre-trained Question Encoder
+    # Indexing: Creates the dense vector index from passages (M1 Baseline)
+    ("facebook/dpr-ctx_encoder-single-nq-base", "facebook_dpr_ctx_encoder"),
+
+    # Retrieval: Encodes the question into a vector for searching the index (M1 Baseline)
     ("facebook/dpr-question_encoder-single-nq-base", "facebook_dpr_question_encoder"),
+
+    # Custom DPR Base: The generic BERT skeleton used to initialise and fine-tune the custom dual-encoder (M2 implementation)
+    ("bert-base-uncased", "bert-base-uncased"),
+
+    # Novel Modification: The newest encoder to replace BERT with and study performance improvements
+    ("answerdotai/ModernBERT-base", "modernbert_base"),
     
-    # The Judge (Baseline): Facebook's Pre-trained Context Encoder
-    ("facebook/dpr-ctx_encoder-single-nq-base", "facebook_dpr_ctx_encoder")
+    # Generation: The LLM that synthesises the final answer using retrieved passages (M1 Baseline Generator)
+    # Refinement: It will also act as the Judge agent for the multi-agent system (M3)
+    ("meta-llama/Meta-Llama-3.1-8B-Instruct", "llama_3_1_8b_instruct")
 ]
 
 def download_data():
     for hf_id, local_name, config in DATASETS:
         save_path = os.path.join(DATA_DIR, local_name)
+
+        # Skip if already exists to save time/bandwidth
+        if os.path.exists(save_path):
+            print(f"[SKIP] {local_name} already exists.")
+            continue
             
         print(f"\n--- Downloading {hf_id} ---")
         try:
