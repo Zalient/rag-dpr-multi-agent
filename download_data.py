@@ -17,7 +17,7 @@ DATASETS = [
     ("trivia_qa", "trivia_qa_rc", "rc"),
     
     # Training Data: Pre-formatted NQ for DPR (Triplets: Query, Pos, Neg) 
-    ("sentence-transformers/natural-questions", "nq_dpr_train", None),
+    ("tomaarsen/natural-questions-hard-negatives", "nq_triplets", "triplet-all"),
     
     # Evaluation Data: Open Domain NQ (Questions + Answers)
     ("nq_open", "nq_open_eval", None) 
@@ -36,9 +36,14 @@ MODELS = [
     # Novel Modification: The newest encoder to replace BERT with and study performance improvements
     ("answerdotai/ModernBERT-base", "modernbert_base"),
     
-    # Generation: The LLM that synthesises the final answer using retrieved passages (M1 Baseline Generator)
-    # Refinement: It will also act as the Judge agent for the multi-agent system (M3)
-    ("meta-llama/Meta-Llama-3.1-8B-Instruct", "llama_3_1_8b_instruct")
+    # Generation (The Student): Synthesises the final answer from retrieved passages
+    # In the multi-agent workflow, this "weaker" model generates the candidate response for the stronger judge to critique
+    ("meta-llama/Meta-Llama-3.1-8B-Instruct", "llama_3_1_8b_instruct"),
+
+    # Refinement (The Professor): Acts as the "Judge" and "Filter" across the pipeline
+    # 1. MAIN-RAG: Filters noisy documents from retrieval before they reach the generator
+    # 2. ChatEval: Adopts multiple personas (4) to critique and grade the generator's output
+    ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b")
 ]
 
 def download_data():
