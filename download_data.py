@@ -52,7 +52,7 @@ def download_data():
 
         # Skip if already exists to save time/bandwidth
         if os.path.exists(save_path):
-            print(f"[SKIP] {local_name} already exists.")
+            print(f"[SKIP] {local_name} already exists")
             continue
             
         print(f"\n--- Downloading {hf_id} ---")
