@@ -31,7 +31,7 @@ MODELS = [
     ("facebook/dpr-question_encoder-single-nq-base", "facebook_dpr_question_encoder"),
 
     # Custom DPR Base: The generic BERT skeleton used to initialise and fine-tune the custom dual-encoder (M2 implementation)
-    ("bert-base-uncased", "bert-base-uncased"),
+    ("bert-base-uncased", "bert_base_uncased"),
 
     # Novel Modification: The newest encoder to replace BERT with and study performance improvements
     ("answerdotai/ModernBERT-base", "modernbert_base"),
