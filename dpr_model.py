@@ -12,8 +12,6 @@ class DPRModel(nn.Module):
             specific dropout parameters from the relevant literature.
         """
         super(DPRModel, self).__init__()
-        # Store the specific configuration (useful for saving the model)
-        self.config = config
 
         # Load in the encoder (e.g. ModernBERT) architecture and its weights
         self.question_encoder = AutoModel.from_pretrained(
