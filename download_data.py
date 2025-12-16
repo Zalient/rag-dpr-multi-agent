@@ -16,31 +16,34 @@ DATASETS = [
     # Complex/Varied: TriviaQA (RC subset) 
     ("trivia_qa", "trivia_qa_rc", "rc"),
     
-    # Training Data: Pre-formatted NQ for DPR (Triplets: Query, Pos, Neg) 
+    # Training Data: Pre-formatted NQ for DPR (Triplets: Query, Pos, Neg) (M2)
     ("tomaarsen/natural-questions-hard-negatives", "nq_triplets", "triplet-all"),
     
-    # Evaluation Data: Open Domain NQ (Questions + Answers)
-    ("nq_open", "nq_open_eval", None) 
+    # Evaluation Data: Open Domain NQ (Questions + Answers) (M4)
+    ("nq_open", "nq_open_eval", None), 
+    
+    # Evaluation Data: Wikipedia context (M4)
+    ("wiki_dpr", "psgs_w100", "psgs_w100")
 ]
 
 MODELS = [
-    # Indexing: Creates the dense vector index from passages (M1 Baseline)
+    # Indexing: Creates the dense vector index from passages (M1)
     ("facebook/dpr-ctx_encoder-single-nq-base", "facebook_dpr_ctx_encoder"),
 
-    # Retrieval: Encodes the question into a vector for searching the index (M1 Baseline)
+    # Retrieval: Encodes the question into a vector for searching the index (M1)
     ("facebook/dpr-question_encoder-single-nq-base", "facebook_dpr_question_encoder"),
 
-    # Custom DPR Base: The generic BERT skeleton used to initialise and fine-tune the custom dual-encoder (M2 implementation)
+    # Custom DPR Base: The generic BERT skeleton used to initialise and fine-tune the custom dual-encoder (M2)
     ("bert-base-uncased", "bert_base_uncased"),
 
     # Novel Modification: The newest encoder to replace BERT with and study performance improvements
     ("answerdotai/ModernBERT-base", "modernbert_base"),
     
-    # Generation (The Student): Synthesises the final answer from retrieved passages
+    # Generation (The Student): Synthesises the final answer from retrieved passages (M3)
     # In the multi-agent workflow, this "weaker" model generates the candidate response for the stronger judge to critique
     ("meta-llama/Meta-Llama-3.1-8B-Instruct", "llama_3_1_8b_instruct"),
 
-    # Refinement (The Professor): Acts as the "Judge" and "Filter" across the pipeline
+    # Refinement (The Professor): Acts as the "Judge" and "Filter" across the pipeline (M3)
     # 1. MAIN-RAG: Filters noisy documents from retrieval before they reach the generator
     # 2. ChatEval: Adopts multiple personas (4) to critique and grade the generator's output
     ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b")
@@ -58,9 +61,10 @@ def download_data():
         print(f"\n--- Downloading {hf_id} ---")
         try:
             if config:
-                ds = load_dataset(hf_id, config)
+                ds = load_dataset(path=hf_id, name=config, trust_remote_code=True)
             else:
-                ds = load_dataset(hf_id)
+                ds = load_dataset(path=hf_id, trust_remote_code=True)
+            # trust_remote_code needed for wiki_dpr.py parsing script to execute to construct the dataset
             
             ds.save_to_disk(save_path)
             print(f"[SUCCESS] Saved to {save_path}")
@@ -73,7 +77,10 @@ def download_models():
         print(f"\n--- Downloading {hf_id} ---")
         try:
             # snapshot_download downloads the raw files (config, bin, json) directly (more robust than AutoModel)
-            snapshot_download(repo_id=hf_id, local_dir=save_path)
+            snapshot_download(
+                repo_id=hf_id, 
+                local_dir=save_path, 
+                ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.tflite", "*.onnx"])
             print(f"[SUCCESS] Saved to {save_path}")
         except Exception as e:
             print(f"[ERROR] Failed {hf_id}: {e}")
