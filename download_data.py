@@ -80,6 +80,7 @@ def download_models():
             snapshot_download(
                 repo_id=hf_id, 
                 local_dir=save_path, 
+                # Only need .pth, .safetensors, .json, .model
                 ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.tflite", "*.onnx"])
             print(f"[SUCCESS] Saved to {save_path}")
         except Exception as e:
