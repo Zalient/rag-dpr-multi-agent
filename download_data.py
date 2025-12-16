@@ -23,7 +23,7 @@ DATASETS = [
     ("nq_open", "nq_open_eval", None), 
     
     # Evaluation Data: Wikipedia context (M4)
-    ("wiki_dpr", "psgs_w100", "psgs_w100")
+    ("wiki_dpr", "psgs_w100", "psgs_w100"),
 ]
 
 MODELS = [
@@ -46,7 +46,7 @@ MODELS = [
     # Refinement (The Professor): Acts as the "Judge" and "Filter" across the pipeline (M3)
     # 1. MAIN-RAG: Filters noisy documents from retrieval before they reach the generator
     # 2. ChatEval: Adopts multiple personas (4) to critique and grade the generator's output
-    ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b")
+    ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b"),
 ]
 
 def download_data():
