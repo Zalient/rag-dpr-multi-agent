@@ -29,7 +29,7 @@ class DPRData(Dataset):
         self.neg_key = next((key for key in self.dataset.column_names if key.startswith("negative")), None)
         print(f"Using negative column: '{self.neg_key}'")
         
-        # Load pre-trained vectors from disk (local_files_only=True)
+        # Load pre-trained tokenizer from disk (local_files_only=True)
         print(f"Loading tokenizer from: {tokenizer_path}")
         self.tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=tokenizer_path, 
@@ -71,6 +71,11 @@ class DPRData(Dataset):
     def __getitem__(self, idx):
         """
         Retrieves and tokenizes a specific example by index.
+
+        Tokenization is performed dynamically rather than statically. This minimises 
+        memory overhead by storing only raw text. 
+        The computational cost of tokenization is negligible compared to the model's
+        forward/backward pass on the GPU, so this does not create a bottleneck.
 
         Args:
             idx (int): The index of the item to retrieve.
