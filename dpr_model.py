@@ -2,6 +2,16 @@ import torch.nn as nn
 from transformers import AutoModel
 
 class DPRModel(nn.Module):
+    """
+    A Dual-Encoder architecture for Dense Passage Retrieval (DPR).
+
+    This model consists of two separate encoders (question encoder and context encoder)
+    initialised from the same pre-trained base model (e.g., ModernBERT).
+    
+    The encoders start with the same weights, but are fine-tuned independently to learn
+    specialised representations for questions and passages.
+    """
+
     def __init__(self, model_path, config):
         """
         Initialises the DPR model.
