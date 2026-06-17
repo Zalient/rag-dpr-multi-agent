@@ -1,95 +1,35 @@
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from transformers import AutoModel
 
-class DPRModel(nn.Module):
+class ModernBERTBiEncoder(nn.Module):
     """
-    A Dual-Encoder architecture for Dense Passage Retrieval (DPR).
-
-    This model consists of two separate encoders (question encoder and context encoder)
-    initialised from the same pre-trained base model (e.g., ModernBERT).
-    
-    The encoders start with the same weights, but are fine-tuned independently to learn
-    specialised representations for questions and passages.
+    Bi-Encoder architecture for ModernBERT
     """
-
     def __init__(self, model_path, config):
-        """
-        Initialises the DPR model.
-
-        Args:
-            model_path (str): Path to the pre-trained model.
-            config (PretrainedConfig): Configuration object containing 
-            specific dropout parameters from the relevant literature.
-        """
-        super(DPRModel, self).__init__()
-
-        # Load in the encoder (e.g. ModernBERT) architecture and its weights
-        self.question_encoder = AutoModel.from_pretrained(
-            pretrained_model_name_or_path=model_path, 
-            config=config,
+        super().__init__()
+            
+        self.encoder = AutoModel.from_pretrained(
+            model_path, 
+            config=config, 
+            local_files_only=True
         )
-        self.ctx_encoder = AutoModel.from_pretrained(
-            pretrained_model_name_or_path=model_path, 
-            config=config,
-        )
-
-    def forward(
-        self,
-        q_input_ids=None,
-        q_attention_mask=None,
-        ctx_input_ids=None,
-        ctx_attention_mask=None,
-    ):
-        """
-        Computes the embeddings for questions and (optionally) for contexts.
+        self.encoder.gradient_checkpointing_enable() 
         
-        This method uses the corresponding encoders to generate the [CLS] token 
-        representation for both the queries and the passages.
+    def forward(self, input_ids, attention_mask=None, **kwargs):
+        # Expects input_ids and attention_mask to be tensors on the correct device already
+        out = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        
+        # CLS pooling (index 0) and L2 normalisation
+        emb = out.last_hidden_state[:, 0, :]
+        return F.normalize(emb, p=2, dim=1)
+    
+    def save_pretrained(self, path):
+        self.encoder.save_pretrained(path)
 
-        Args:
-            q_input_ids (torch.Tensor, optional): Input token IDs for the questions. 
-                Shape: (batch_size, sequence_length). Defaults to None.
-            q_attention_mask (torch.Tensor, optional): Attention mask for the questions. 
-                Shape: (batch_size, sequence_length). Defaults to None.
-            ctx_input_ids (torch.Tensor, optional): Input token IDs for the contexts. 
-                Shape: (batch_size, sequence_length). Defaults to None.
-            ctx_attention_mask (torch.Tensor, optional): Attention mask for the contexts. 
-                Shape: (batch_size, sequence_length). Defaults to None.
-
-        Returns:
-            tuple: A tuple containing:
-                - q_out (torch.Tensor): The pooled question embeddings. 
-                  Shape: (batch_size, hidden_size).
-                - ctx_out (torch.Tensor or None): The pooled context embeddings. 
-                  Shape: (batch_size, hidden_size). Returns None if contexts are not provided.
-        """
-        q_out = None
-        ctx_out = None
-
-        # Encode Questions
-        if q_input_ids is not None:
-            # 1. Get the ModelOutput object
-            model_output = self.question_encoder(
-                input_ids=q_input_ids, 
-                attention_mask=q_attention_mask
-            )
-            # 2. Extract the sequence output: (batch, seq_len, hidden)
-            sequence_output = model_output.last_hidden_state
-            
-            # 3. Extract the CLS token (batch, hidden)
-            q_out = sequence_output[:, 0, :]
-
-        # Encode Contexts
-        if ctx_input_ids is not None:
-            # 1. Get the ModelOutput object
-            model_output = self.ctx_encoder(
-                input_ids=ctx_input_ids, 
-                attention_mask=ctx_attention_mask
-            )
-            # 2. Extract the sequence output: (batch, seq_len, hidden)
-            sequence_output = model_output.last_hidden_state
-            
-            # 3. Extract the CLS token (batch, hidden)
-            ctx_out = sequence_output[:, 0, :]
-
-        return q_out, ctx_out
+def gradcache_loss(q, p, n, temp=0.05, **kwargs):
+    cands = torch.cat([p, n], dim=0)
+    scores = torch.matmul(q, cands.transpose(0, 1)) / temp
+    targets = torch.arange(q.size(0), device=q.device)
+    return F.cross_entropy(scores, targets)

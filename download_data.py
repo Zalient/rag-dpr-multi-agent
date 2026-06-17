@@ -10,43 +10,40 @@ os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 DATASETS = [
-    # Benchmark: SQuAD 2.0 (Unanswerable questions support) 
-    ("squad_v2", "squad_v2", None),
-    
-    # Complex/Varied: TriviaQA (RC subset) 
-    ("trivia_qa", "trivia_qa_rc", "rc"),
-    
-    # Training Data: Pre-formatted NQ for DPR (Triplets: Query, Pos, Neg) (M2)
+    # Pre-formatted NQ for DPR (Triplets: Query, Pos, Neg) 
     ("tomaarsen/natural-questions-hard-negatives", "nq_triplets", "triplet-all"),
     
-    # Evaluation Data: Open Domain NQ (Questions + Answers) (M4)
+    # Open Domain NQ (Questions + Answers)
     ("nq_open", "nq_open_eval", None), 
     
-    # Evaluation Data: Wikipedia context (M4)
-    ("wiki_dpr", "psgs_w100", "psgs_w100"),
+    # SQuAD 2.0 (Unanswerable questions) 
+    ("squad_v2", "squad_v2", None),
+    
+    # TriviaQA (RC subset) 
+    ("trivia_qa", "trivia_qa_rc", "rc"),
+    
+    # Wikipedia context (2018 dump)
+    ("wiki_dpr", "psgs_w100", "psgs_w100.nq.no_index")
 ]
 
 MODELS = [
-    # Indexing: Creates the dense vector index from passages (M1)
+    # Baseline Bi-Encoder (Context)
     ("facebook/dpr-ctx_encoder-single-nq-base", "facebook_dpr_ctx_encoder"),
 
-    # Retrieval: Encodes the question into a vector for searching the index (M1)
+    # Baseline Bi-Encoder (Queries)
     ("facebook/dpr-question_encoder-single-nq-base", "facebook_dpr_question_encoder"),
 
-    # Custom DPR Base: The generic BERT skeleton used to initialise and fine-tune the custom dual-encoder (M2)
-    ("bert-base-uncased", "bert_base_uncased"),
-
-    # Novel Modification: The newest encoder to replace BERT with and study performance improvements
+    # ModernBERT Bi-Encoder/Cross-Encoder to be fine-tuned
     ("answerdotai/ModernBERT-base", "modernbert_base"),
     
-    # Generation (The Student): Synthesises the final answer from retrieved passages (M3)
-    # In the multi-agent workflow, this "weaker" model generates the candidate response for the stronger judge to critique
+    # Cross-Encoder Teacher
+    ("BAAI/bge-reranker-v2-m3", "bge_reranker_v2_m3"),
+    
+    # Generation (The Student): Generates the final answers from retrieved passages
     ("meta-llama/Meta-Llama-3.1-8B-Instruct", "llama_3_1_8b_instruct"),
 
-    # Refinement (The Professor): Acts as the "Judge" and "Filter" across the pipeline (M3)
-    # 1. MAIN-RAG: Filters noisy documents from retrieval before they reach the generator
-    # 2. ChatEval: Adopts multiple personas (4) to critique and grade the generator's output
-    ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b"),
+    # Refinement (The Professor): ChatEval: Adopts multiple personas (4) to critique and grade the generator's output
+    ("deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek_r1_distill_qwen_32b")
 ]
 
 def download_data():
@@ -61,10 +58,9 @@ def download_data():
         print(f"\n--- Downloading {hf_id} ---")
         try:
             if config:
-                ds = load_dataset(path=hf_id, name=config, trust_remote_code=True)
+                ds = load_dataset(hf_id, config, trust_remote_code=True)
             else:
-                ds = load_dataset(path=hf_id, trust_remote_code=True)
-            # trust_remote_code needed for wiki_dpr.py parsing script to execute to construct the dataset
+                ds = load_dataset(hf_id, trust_remote_code=True)
             
             ds.save_to_disk(save_path)
             print(f"[SUCCESS] Saved to {save_path}")
@@ -80,8 +76,7 @@ def download_models():
             snapshot_download(
                 repo_id=hf_id, 
                 local_dir=save_path, 
-                # Only need .pth, .safetensors, .json, .model
-                ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.tflite", "*.onnx"])
+                ignore_patterns=["*.h5", "*.ot", "*.msgpack", "*.tflite", "*.onnx", "coreml/*"])
             print(f"[SUCCESS] Saved to {save_path}")
         except Exception as e:
             print(f"[ERROR] Failed {hf_id}: {e}")
